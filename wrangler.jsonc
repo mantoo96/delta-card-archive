@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "delta-card-archive",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-07-12",
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "618889.xyz",
+      "custom_domain": true
+    }
+  ],
+  "assets": {
+    "directory": "./static",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "delta-card-archive",
+      "database_id": "036bd9fe-9389-46b1-9b27-6a4b98595faf",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
