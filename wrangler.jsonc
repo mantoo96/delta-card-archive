@@ -3,7 +3,10 @@
   "name": "delta-card-archive",
   "main": "src/worker.js",
   "compatibility_date": "2026-07-12",
-  "workers_dev": true,
+  "workers_dev": false,
+  "vars": {
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAD1vfZZAbROgH3zg"
+  },
   "routes": [
     {
       "pattern": "618889.xyz",

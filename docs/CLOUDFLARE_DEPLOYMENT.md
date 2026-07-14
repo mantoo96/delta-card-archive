@@ -1,6 +1,6 @@
 # Cloudflare 部署与运维记录
 
-最后更新：2026-07-12
+最后更新：2026-07-14
 
 ## 线上资源
 
@@ -8,7 +8,7 @@
 |---|---|
 | Worker 名称 | `delta-card-archive` |
 | 正式域名 | `https://618889.xyz` |
-| 备用地址 | `https://delta-card-archive.pei960615.workers.dev` |
+| `workers.dev` | 已关闭，只允许通过正式域名访问 |
 | D1 数据库名称 | `delta-card-archive` |
 | D1 Binding | `DB` |
 | D1 Database ID | 以本地 `wrangler.jsonc` 为准，不在公开文档重复记录 |
@@ -20,7 +20,7 @@ Cloudflare 登录使用官方 Wrangler OAuth。账号采用 Google 快捷登录�
 
 OAuth 凭据保存在用户系统目录，不在本项目内。不要读取、复制或提交凭据文件。
 
-公开 GitHub 仓库通过 Actions 自动部署，仓库 Secrets 需要配置 `CLOUDFLARE_API_TOKEN` 和 `CLOUDFLARE_ACCOUNT_ID`。Token 只授予当前 Worker、D1 和域名部署所需的最小权限。
+公开 GitHub 仓库位于 `mantoo96/delta-card-archive`。Actions 工作流在 Secrets 配置完成前仅允许手动触发；配置 `CLOUDFLARE_API_TOKEN` 和 `CLOUDFLARE_ACCOUNT_ID` 后，再恢复 `main` 分支推送自动部署。Token 只授予当前 Worker、D1 和域名部署所需的最小权限。
 
 ## 当前架构
 
@@ -161,13 +161,15 @@ npx wrangler d1 execute DB --remote --command \
 ]
 ```
 
-`workers_dev: true` 用于同时保留备用的 `workers.dev` 地址。
+`workers_dev: false` 用于关闭公开的 `workers.dev` 地址，避免访问者绕过 `618889.xyz` 上的域名级防护配置。
 
 ## 已知注意事项
 
 - Cloudflare 生产 Web Crypto 拒绝超过 100,000 次的 PBKDF2；本地模拟器可能不会暴露这个限制。
 - `/api/auth/me` 未登录时返回 HTTP 401，这是正常行为，不是站点故障。
-- 公开注册目前没有邀请码或验证码，任何知道网址的人都能注册。若出现滥用，优先增加邀请码或 Cloudflare Turnstile。
+- 公开注册使用 Cloudflare Turnstile；注册、登录和收藏写入接口还配置了独立限流。Turnstile Secret 只保存在 Worker Secret 中，不能写入仓库。
+- 游客收藏只保存在当前浏览器；登录或注册成功后会与云端收藏取并集，确认云端保存成功后才清除游客数据。
+- 生产 D1 完整备份保存在本机忽略目录 `backups/`，不得提交 Git。2026-07-14 公共加固前备份 SHA-256 为 `f23af6efb50d35384f3fdc14894160a3cd3c120aec8c735dc1266155556e6586`。
 - `data/collection.json` 是旧局域网版本的本地备份，不会自动上传。2026-07-12 检查时其中有 36 张收藏记录，可在用户注册后进行一次性迁移。
 
 ## 旧数据迁移方法

@@ -19,7 +19,7 @@
 
 - 当前生产数据库已经存在，不要再次运行 `wrangler d1 create`，除非明确要创建新环境。
 - 不要修改 `wrangler.jsonc` 中现有 D1 `database_id`。
-- 保留自定义域名 `618889.xyz` 和 `workers_dev: true`，确保正式域名与备用地址都能访问。
+- 保留自定义域名 `618889.xyz`，并保持 `workers_dev: false`，避免公开的 `workers.dev` 备用入口绕过正式域名上的防护策略。
 - 数据库结构变化必须新增迁移文件，不要修改已经在线执行过的 `0001_initial.sql`。
 - Cloudflare Web Crypto 的 PBKDF2 迭代次数上限是 `100000`，不要调高，否则生产注册/登录会触发 Worker 1101 错误。
 - 密码不得明文记录、输出或写入日志。认证 Cookie 必须继续使用 `HttpOnly`、`SameSite=Lax`，线上使用 `Secure`。

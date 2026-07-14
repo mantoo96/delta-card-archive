@@ -1,5 +1,17 @@
 # 变更记录
 
+## 2026-07-14
+
+### 公开发布与安全加固
+
+- 增加游客模式，未登录时收藏只保存在当前浏览器；登录或注册后安全合并到账号数据。
+- 注册增加 Cloudflare Turnstile，人机验证 Secret 使用 Worker Secret 保存。
+- 为注册、登录和收藏写入接口增加 Cloudflare Rate Limiting 绑定。
+- 增加隐私说明、安全报告指南、MIT License 和 GitHub Actions 部署工作流。
+- 创建公开仓库 `mantoo96/delta-card-archive`，发布前完成生产 D1 完整备份。
+- 关闭公开的 `workers.dev` 地址，只保留 `https://618889.xyz`，防止绕过正式域名上的防护策略。
+- 生产验证未创建遗留测试账号；原有用户、会话和收藏记录数量保持不变。
+
 ## 2026-07-12
 
 ### 初始局域网版本
@@ -27,4 +39,4 @@
 
 - Worker：`delta-card-archive`
 - 正式地址：`https://618889.xyz`
-- 备用地址：`https://delta-card-archive.pei960615.workers.dev`
+- 初次上线时提供过 `workers.dev` 备用地址，已于 2026-07-14 关闭。

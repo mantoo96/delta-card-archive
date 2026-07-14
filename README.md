@@ -5,6 +5,7 @@
 > 非官方玩家工具，与《三角洲行动》及其开发、发行和运营主体无隶属或合作关系。
 
 - 试用地址：<https://618889.xyz>
+- 源代码：<https://github.com/mantoo96/delta-card-archive>
 - Codex/维护说明：[`AGENTS.md`](AGENTS.md)
 - Cloudflare 运维记录：[`docs/CLOUDFLARE_DEPLOYMENT.md`](docs/CLOUDFLARE_DEPLOYMENT.md)
 - 变更历史：[`CHANGELOG.md`](CHANGELOG.md)
@@ -51,7 +52,7 @@ npm run dev
 
 Wrangler 会显示本地访问地址，通常为 `http://localhost:8787`。
 
-## 首次部署
+## 首次部署自己的副本
 
 登录 Cloudflare：
 
@@ -77,6 +78,8 @@ npm run deploy
 ```bash
 npm run deploy
 ```
+
+维护现有的 `618889.xyz` 生产环境时，不要重新创建 D1，也不要修改现有 `database_id`；请先阅读 [`AGENTS.md`](AGENTS.md)。
 
 ## 数据结构
 
