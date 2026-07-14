@@ -20,7 +20,7 @@ Cloudflare 登录使用官方 Wrangler OAuth。账号采用 Google 快捷登录�
 
 OAuth 凭据保存在用户系统目录，不在本项目内。不要读取、复制或提交凭据文件。
 
-公开 GitHub 仓库位于 `mantoo96/delta-card-archive`。Actions 工作流在 Secrets 配置完成前仅允许手动触发；配置 `CLOUDFLARE_API_TOKEN` 和 `CLOUDFLARE_ACCOUNT_ID` 后，再恢复 `main` 分支推送自动部署。Token 只授予当前 Worker、D1 和域名部署所需的最小权限。
+公开 GitHub 仓库位于 `mantoo96/delta-card-archive`。Actions 已配置 `CLOUDFLARE_API_TOKEN` 和 `CLOUDFLARE_ACCOUNT_ID`，推送到 `main` 分支或手动触发工作流都会先检查代码、应用待执行的 D1 迁移，再部署 Worker。Token 只授予当前账户的 D1、Workers 脚本和账户读取权限，以及 `618889.xyz` 的 Workers 路由权限。
 
 ## 当前架构
 

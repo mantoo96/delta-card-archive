@@ -9,6 +9,7 @@
 - 为注册、登录和收藏写入接口增加 Cloudflare Rate Limiting 绑定。
 - 增加隐私说明、安全报告指南、MIT License 和 GitHub Actions 部署工作流。
 - 创建公开仓库 `mantoo96/delta-card-archive`，发布前完成生产 D1 完整备份。
+- 配置最小权限 Cloudflare API Token，验证 GitHub Actions 手动部署成功，并启用 `main` 分支推送自动部署。
 - 关闭公开的 `workers.dev` 地址，只保留 `https://618889.xyz`，防止绕过正式域名上的防护策略。
 - 生产验证未创建遗留测试账号；原有用户、会话和收藏记录数量保持不变。
 
