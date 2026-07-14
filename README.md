@@ -4,8 +4,7 @@
 
 > 非官方玩家工具，与《三角洲行动》及其开发、发行和运营主体无隶属或合作关系。
 
-- 正式地址：<https://618889.xyz>
-- 备用地址：<https://delta-card-archive.pei960615.workers.dev>
+- 试用地址：<https://618889.xyz>
 - Codex/维护说明：[`AGENTS.md`](AGENTS.md)
 - Cloudflare 运维记录：[`docs/CLOUDFLARE_DEPLOYMENT.md`](docs/CLOUDFLARE_DEPLOYMENT.md)
 - 变更历史：[`CHANGELOG.md`](CHANGELOG.md)
