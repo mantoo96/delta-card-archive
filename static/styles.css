@@ -162,6 +162,12 @@ button { color: inherit; }
 .auth-error { min-height: 18px; color: #f27b70; font-size: 11px; margin: 0; }
 .auth-submit { height: 46px; border: 0; color: #111; background: var(--green); font-weight: 750; cursor: pointer; }
 .auth-submit:disabled { opacity: .55; cursor: wait; }
+.guest-submit { height: 42px; border: 1px solid var(--line-bright); color: var(--muted); background: transparent; cursor: pointer; }
+.guest-submit:hover { color: var(--text); border-color: var(--green); }
+.turnstile-slot { min-height: 65px; display: flex; justify-content: center; overflow: hidden; }
+.turnstile-slot[hidden] { display: none; }
+.auth-privacy { margin: 18px 0 0; color: #686f6a; font-size: 9px; line-height: 1.6; text-align: center; }
+.auth-privacy a { color: #929a94; }
 
 .status-dot {
   width: 7px;
@@ -371,6 +377,15 @@ h1 em { color: var(--green); font-style: normal; }
 .empty-state p { font-size: 13px; margin: 0; }
 
 footer { border-top: 1px solid var(--line); padding: 25px max(24px, calc((100vw - 1240px) / 2)); display: flex; justify-content: space-between; color: #5c625e; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+footer a { color: inherit; }
+
+.legal-page { max-width: 780px; padding: 75px 0 100px; }
+.legal-page h1 { margin-bottom: 25px; }
+.legal-lead { color: var(--muted); font-size: 15px; line-height: 1.8; margin-bottom: 48px; }
+.legal-page section { padding: 25px 0; border-top: 1px solid var(--line); }
+.legal-page h2 { margin: 0 0 10px; font-size: 15px; }
+.legal-page section p { margin: 0; color: var(--muted); line-height: 1.9; font-size: 13px; }
+.legal-back { color: var(--green); text-decoration: none; font-size: 12px; }
 
 .toast {
   position: fixed;
@@ -425,6 +440,7 @@ footer { border-top: 1px solid var(--line); padding: 25px max(24px, calc((100vw 
   .playing-card .center { font-size: 36px; }
   .playing-card .card-label { font-size: 7px; }
   footer { padding: 22px 14px; }
+  .legal-page { padding: 45px 0 75px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

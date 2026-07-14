@@ -5,3 +5,4 @@ data/collection.json
 node_modules/
 .wrangler/
 .dev.vars
+backups/

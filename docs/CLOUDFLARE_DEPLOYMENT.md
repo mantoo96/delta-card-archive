@@ -6,13 +6,12 @@
 
 | 资源 | 值 |
 |---|---|
-| Cloudflare Account ID | `296c13c55805e3d298de849f8683205a` |
 | Worker 名称 | `delta-card-archive` |
 | 正式域名 | `https://618889.xyz` |
 | 备用地址 | `https://delta-card-archive.pei960615.workers.dev` |
 | D1 数据库名称 | `delta-card-archive` |
 | D1 Binding | `DB` |
-| D1 Database ID | `036bd9fe-9389-46b1-9b27-6a4b98595faf` |
+| D1 Database ID | 以本地 `wrangler.jsonc` 为准，不在公开文档重复记录 |
 | D1 区域 | APAC |
 | 静态资源 Binding | `ASSETS` |
 | Wrangler 版本 | `4.110.0`（初次部署时） |
@@ -20,6 +19,8 @@
 Cloudflare 登录使用官方 Wrangler OAuth。账号采用 Google 快捷登录不影响 CLI 授权；运行 `npx wrangler login` 后在浏览器完成确认即可，不需要提供 Google 密码或 API Token。
 
 OAuth 凭据保存在用户系统目录，不在本项目内。不要读取、复制或提交凭据文件。
+
+公开 GitHub 仓库通过 Actions 自动部署，仓库 Secrets 需要配置 `CLOUDFLARE_API_TOKEN` 和 `CLOUDFLARE_ACCOUNT_ID`。Token 只授予当前 Worker、D1 和域名部署所需的最小权限。
 
 ## 当前架构
 

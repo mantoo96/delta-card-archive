@@ -33,6 +33,10 @@ export default {
       if (url.pathname === "/api/auth/me" && request.method === "GET") {
         return currentUser(request, env);
       }
+      if (url.pathname === "/api/config" && request.method === "GET") {
+        if (!env.TURNSTILE_SITE_KEY) return json({ error: "验证服务未配置" }, 503);
+        return json({ turnstileSiteKey: env.TURNSTILE_SITE_KEY });
+      }
       if (url.pathname === "/api/collection" && request.method === "GET") {
         return getCollection(request, env);
       }
@@ -54,6 +58,12 @@ async function register(request, env, url) {
   const password = validatePassword(body.password);
   if (!username.ok) return json({ error: username.error }, 400);
   if (!password.ok) return json({ error: password.error }, 400);
+  if (!await allowRequest(env.REGISTER_RATE_LIMITER, `register:${clientIp(request)}`)) {
+    return rateLimited("注册操作过于频繁，请一分钟后再试");
+  }
+  if (!await verifyTurnstile(request, env, body.turnstileToken, url)) {
+    return json({ error: "人机验证失败，请重试" }, 400);
+  }
 
   const exists = await env.DB.prepare("SELECT id FROM users WHERE username = ?").bind(username.value).first();
   if (exists) return json({ error: "用户名已被使用" }, 409);
@@ -84,7 +94,9 @@ async function login(request, env, url) {
   if (!username.ok || typeof body.password !== "string") {
     return json({ error: "用户名或密码错误" }, 401);
   }
-
+  if (!await allowRequest(env.LOGIN_RATE_LIMITER, `login:${clientIp(request)}`)) {
+    return rateLimited("登录操作过于频繁，请一分钟后再试");
+  }
   const user = await env.DB.prepare(
     "SELECT id, username, password_hash, password_salt FROM users WHERE username = ?",
   ).bind(username.value).first();
@@ -123,6 +135,9 @@ async function getCollection(request, env) {
 async function putCollection(request, env) {
   const user = await authenticate(request, env);
   if (!user) return json({ error: "请先登录" }, 401);
+  if (!await allowRequest(env.COLLECTION_WRITE_RATE_LIMITER, `collection:${user.id}`)) {
+    return rateLimited("保存过于频繁，请稍后再试");
+  }
   const body = await readJson(request);
   if (!Array.isArray(body.owned) || !body.owned.every((card) => typeof card === "string")) {
     return json({ error: "收藏数据格式错误" }, 400);
@@ -250,6 +265,47 @@ async function readJson(request) {
 function sameOrigin(request, url) {
   const origin = request.headers.get("Origin");
   return !origin || origin === url.origin;
+}
+
+async function allowRequest(limiter, key) {
+  if (!limiter) return true;
+  const result = await limiter.limit({ key });
+  return result.success;
+}
+
+function clientIp(request) {
+  return request.headers.get("CF-Connecting-IP") || "unknown";
+}
+
+function rateLimited(message) {
+  return json({ error: message }, 429, { "Retry-After": "60" });
+}
+
+async function verifyTurnstile(request, env, token, url) {
+  if (!env.TURNSTILE_SECRET_KEY || typeof token !== "string" || !token || token.length > 2048) return false;
+  const form = new FormData();
+  form.set("secret", env.TURNSTILE_SECRET_KEY);
+  form.set("response", token);
+  form.set("remoteip", clientIp(request));
+  form.set("idempotency_key", crypto.randomUUID());
+
+  let response;
+  try {
+    response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      body: form,
+    });
+  } catch {
+    return false;
+  }
+  if (!response.ok) return false;
+  const result = await response.json();
+  if (!result.success) return false;
+
+  const isTestKey = env.TURNSTILE_SECRET_KEY.startsWith("1x00000000000000000000");
+  if (!isTestKey && result.hostname !== url.hostname) return false;
+  if (result.action && result.action !== "auth") return false;
+  return true;
 }
 
 function getCookie(request, name) {

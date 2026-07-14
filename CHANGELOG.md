@@ -26,10 +26,5 @@
 ### 首次上线
 
 - Worker：`delta-card-archive`
-- D1 Database ID：`036bd9fe-9389-46b1-9b27-6a4b98595faf`
-- 初始 Workers.dev 部署版本：`e7641250-c16e-478a-856e-6380f3a9b0b6`
-- 修复 PBKDF2 后版本：`78bcece9-cbf3-4a48-b660-9610e271acbc`
-- 首次绑定自定义域名版本：`001fc10e-b515-4f2e-b9de-baf6ef8be648`
-- 当前同时启用自定义域名和 Workers.dev 的版本：`294b37c3-a5ed-4d3b-973b-6766a60c6523`
 - 正式地址：`https://618889.xyz`
 - 备用地址：`https://delta-card-archive.pei960615.workers.dev`

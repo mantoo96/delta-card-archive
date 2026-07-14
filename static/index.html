@@ -29,9 +29,12 @@
           <span>密码</span>
           <input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required placeholder="至少 8 位">
         </label>
+        <div class="turnstile-slot" id="turnstileWidget" aria-label="人机验证" hidden></div>
         <p class="auth-error" id="authError" aria-live="polite"></p>
         <button class="auth-submit" id="authSubmit" type="submit">进入牌盒</button>
+        <button class="guest-submit" id="guestButton" type="button">先以游客身份使用</button>
       </form>
+      <p class="auth-privacy">注册即表示同意本站的<a href="/privacy.html" target="_blank">隐私说明</a>。本站为非官方玩家工具。</p>
     </div>
   </section>
   <header class="topbar">
@@ -49,7 +52,7 @@
       </div>
       <button class="account-button" id="accountButton" type="button" title="退出登录">
         <span id="accountName">--</span>
-        <small>退出</small>
+        <small id="accountAction">退出</small>
       </button>
     </div>
   </header>
@@ -113,10 +116,11 @@
 
   <footer>
     <span>△ 牌盒记录</span>
-    <span>账号同步 · 自动保存</span>
+    <span><a href="/privacy.html">隐私说明</a> · 非官方玩家工具</span>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
   <script src="/app.js" defer></script>
 </body>
 </html>

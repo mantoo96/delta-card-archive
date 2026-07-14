@@ -2,6 +2,8 @@
 
 部署在 Cloudflare Workers 上的多用户扑克牌收藏 Web UI。每个账号拥有独立的收藏进度，数据保存在 Cloudflare D1 中。
 
+> 非官方玩家工具，与《三角洲行动》及其开发、发行和运营主体无隶属或合作关系。
+
 - 正式地址：<https://618889.xyz>
 - 备用地址：<https://delta-card-archive.pei960615.workers.dev>
 - Codex/维护说明：[`AGENTS.md`](AGENTS.md)
@@ -16,6 +18,14 @@
 - 按花色排序、拥有状态筛选、牌名搜索
 - 自动保存、JSON 导入导出
 - 手机、平板和电脑响应式布局
+- 游客本机保存，注册登录后可合并并跨设备同步
+- Cloudflare Turnstile 人机验证和接口限流
+
+## 隐私与安全
+
+- [隐私说明](static/privacy.html)
+- [安全问题报告](SECURITY.md)
+- 本项目采用 [MIT License](LICENSE)
 
 ## 技术结构
 

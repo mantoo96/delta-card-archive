@@ -10,10 +10,14 @@ const JOKERS = [
   { id: "joker-red", name: "大王", display: "RED JOKER", red: true },
 ];
 const TOTAL = 54;
+const GUEST_COLLECTION_KEY = "delta-guest-owned-v1";
 
 const state = {
   user: null,
+  mode: "loading",
   authMode: "login",
+  turnstileWidgetId: null,
+  turnstileToken: "",
   owned: new Set(),
   filter: "all",
   search: "",
@@ -47,6 +51,9 @@ const elements = {
   authSubmit: document.querySelector("#authSubmit"),
   accountButton: document.querySelector("#accountButton"),
   accountName: document.querySelector("#accountName"),
+  accountAction: document.querySelector("#accountAction"),
+  guestButton: document.querySelector("#guestButton"),
+  turnstileWidget: document.querySelector("#turnstileWidget"),
 };
 
 function cardId(suit, rank) {
@@ -195,15 +202,20 @@ function showToast(message) {
 async function loadCollection() {
   try {
     const response = await fetch("/api/collection", { cache: "no-store" });
-    if (response.status === 401) return showAuth();
+    if (response.status === 401) {
+      enterGuest();
+      return false;
+    }
     if (!response.ok) throw new Error("load failed");
     const data = await response.json();
     state.owned = new Set(data.owned || []);
     setConnection("online", "已连接 · 自动保存");
     render();
+    return true;
   } catch (error) {
     setConnection("error", "连接失败");
     showToast("无法连接收藏服务器");
+    return false;
   }
 }
 
@@ -212,27 +224,98 @@ function showAuth(message = "") {
   elements.authScreen.hidden = false;
   elements.authError.textContent = message;
   elements.authPassword.value = "";
+  updateTurnstileVisibility();
   setTimeout(() => elements.authUsername.focus(), 0);
 }
 
 function hideAuth(user) {
   state.user = user;
+  state.mode = "account";
   elements.accountName.textContent = user.username;
+  elements.accountAction.textContent = "退出";
+  elements.accountButton.title = "退出登录";
   elements.authScreen.hidden = true;
   document.body.classList.remove("auth-open");
+}
+
+function readGuestCollection() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(GUEST_COLLECTION_KEY) || "[]");
+    return new Set(Array.isArray(parsed) ? parsed : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function enterGuest() {
+  state.user = null;
+  state.mode = "guest";
+  state.owned = readGuestCollection();
+  elements.accountName.textContent = "游客";
+  elements.accountAction.textContent = "登录";
+  elements.accountButton.title = "登录并同步收藏";
+  elements.authScreen.hidden = true;
+  document.body.classList.remove("auth-open");
+  setConnection("online", "本机保存 · 登录可同步");
+  render();
 }
 
 async function bootstrap() {
   document.body.classList.add("auth-open");
   try {
     const response = await fetch("/api/auth/me", { cache: "no-store" });
-    if (!response.ok) return showAuth();
+    if (!response.ok) {
+      if (readGuestCollection().size > 0) return enterGuest();
+      return showAuth();
+    }
     const data = await response.json();
     hideAuth(data.user);
     await loadCollection();
   } catch (error) {
     showAuth("无法连接服务器，请稍后重试");
   }
+}
+
+async function waitForTurnstile(timeoutMs = 8000) {
+  const started = Date.now();
+  while (!window.turnstile && Date.now() - started < timeoutMs) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  return window.turnstile;
+}
+
+async function ensureTurnstile() {
+  if (state.authMode !== "register") return;
+  if (state.turnstileWidgetId !== null) {
+    window.turnstile?.reset(state.turnstileWidgetId);
+    state.turnstileToken = "";
+    return;
+  }
+  try {
+    const [configResponse, turnstile] = await Promise.all([
+      fetch("/api/config", { cache: "no-store" }),
+      waitForTurnstile(),
+    ]);
+    if (!configResponse.ok || !turnstile) throw new Error("验证服务加载失败");
+    const config = await configResponse.json();
+    state.turnstileWidgetId = turnstile.render(elements.turnstileWidget, {
+      sitekey: config.turnstileSiteKey,
+      theme: "dark",
+      size: "flexible",
+      action: "auth",
+      callback: (token) => { state.turnstileToken = token; },
+      "expired-callback": () => { state.turnstileToken = ""; },
+      "error-callback": () => { state.turnstileToken = ""; },
+    });
+  } catch (error) {
+    elements.authError.textContent = "人机验证加载失败，请刷新页面重试";
+  }
+}
+
+function updateTurnstileVisibility() {
+  const needsChallenge = state.authMode === "register";
+  elements.turnstileWidget.hidden = !needsChallenge;
+  if (needsChallenge) ensureTurnstile();
 }
 
 document.querySelectorAll("[data-auth-mode]").forEach((button) => {
@@ -242,6 +325,7 @@ document.querySelectorAll("[data-auth-mode]").forEach((button) => {
     elements.authSubmit.textContent = state.authMode === "register" ? "创建账号" : "进入牌盒";
     elements.authPassword.autocomplete = state.authMode === "register" ? "new-password" : "current-password";
     elements.authError.textContent = "";
+    updateTurnstileVisibility();
   });
 });
 
@@ -250,41 +334,70 @@ elements.authForm.addEventListener("submit", async (event) => {
   elements.authSubmit.disabled = true;
   elements.authError.textContent = "";
   try {
+    if (state.authMode === "register" && !state.turnstileToken) throw new Error("请先完成人机验证");
+    const guestOwned = readGuestCollection();
     const response = await fetch(`/api/auth/${state.authMode}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: elements.authUsername.value, password: elements.authPassword.value }),
+      body: JSON.stringify({
+        username: elements.authUsername.value,
+        password: elements.authPassword.value,
+        turnstileToken: state.turnstileToken,
+      }),
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "操作失败");
     hideAuth(data.user);
     state.owned.clear();
     render();
-    await loadCollection();
-    showToast(state.authMode === "register" ? "账号创建成功" : "登录成功");
+    const loaded = await loadCollection();
+    if (!loaded) return;
+    if (guestOwned.size > 0) {
+      state.owned = new Set([...state.owned, ...guestOwned]);
+      render();
+      const merged = await saveCollection();
+      if (merged) {
+        localStorage.removeItem(GUEST_COLLECTION_KEY);
+        showToast(`已合并 ${guestOwned.size} 张游客收藏`);
+      }
+    } else {
+      showToast(state.authMode === "register" ? "账号创建成功" : "登录成功");
+    }
   } catch (error) {
     elements.authError.textContent = error.message;
   } finally {
     elements.authSubmit.disabled = false;
+    state.turnstileToken = "";
+    if (state.authMode === "register" && state.turnstileWidgetId !== null) window.turnstile?.reset(state.turnstileWidgetId);
   }
 });
 
+elements.guestButton.addEventListener("click", enterGuest);
+
 elements.accountButton.addEventListener("click", async () => {
+  if (state.mode === "guest") {
+    showAuth();
+    return;
+  }
   if (!confirm(`确定退出账号 ${state.user?.username || ""} 吗？`)) return;
   try {
     await fetch("/api/auth/logout", { method: "POST" });
   } finally {
     state.user = null;
-    state.owned.clear();
-    render();
-    showAuth();
+    enterGuest();
   }
 });
 
 async function saveCollection() {
+  if (state.mode === "guest") {
+    localStorage.setItem(GUEST_COLLECTION_KEY, JSON.stringify([...state.owned]));
+    setConnection("online", "已保存到本机");
+    setTimeout(() => setConnection("online", "本机保存 · 登录可同步"), 900);
+    return true;
+  }
   if (state.saving) {
     state.saveQueued = true;
-    return;
+    return false;
   }
   state.saving = true;
   state.saveQueued = false;
@@ -298,9 +411,11 @@ async function saveCollection() {
     if (!response.ok) throw new Error("save failed");
     setConnection("online", "已保存");
     setTimeout(() => setConnection("online", "已连接 · 自动保存"), 1000);
+    return true;
   } catch (error) {
     setConnection("error", "保存失败");
     showToast("保存失败，请检查服务器");
+    return false;
   } finally {
     state.saving = false;
     if (state.saveQueued) saveCollection();
