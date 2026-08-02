@@ -1,4 +1,4 @@
-# 三角洲扑克牌收集记录
+# 阿萨拉牌盒收集记录
 
 部署在 Cloudflare Workers 上的多用户扑克牌收藏 Web UI。每个账号拥有独立的收藏进度，数据保存在 Cloudflare D1 中。
 
