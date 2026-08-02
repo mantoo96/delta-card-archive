@@ -87,7 +87,7 @@ function cardButton({ id, rank, symbol, name, red = false, joker = false, displa
 
 function renderSuitSorted() {
   let visible = 0;
-  const sections = SUITS.map((suit) => {
+  const sections = SUITS.map((suit, suitIndex) => {
     const cards = RANKS.map((rank) => {
       const markup = cardButton({
         id: cardId(suit.id, rank), rank, symbol: suit.symbol, name: suit.name, red: suit.red,
@@ -97,8 +97,10 @@ function renderSuitSorted() {
     }).join("");
     if (!cards) return "";
     const suitOwned = RANKS.filter((rank) => state.owned.has(cardId(suit.id, rank))).length;
+    const pane = suitIndex < 2 ? "left" : "right";
+    const paneRow = suitIndex < 2 ? suitIndex + 1 : suitIndex - 1;
     return `
-      <section class="suit-section">
+      <section class="suit-section pane-${pane}" style="--pane-row: ${paneRow}">
         <div class="suit-heading ${suit.red ? "red" : ""}">
           <span class="suit-symbol">${suit.symbol}</span><h2>${suit.name}</h2>
           <span class="line"></span><small>${suitOwned}/13</small>
@@ -115,7 +117,7 @@ function renderSuitSorted() {
   if (jokerCards) {
     const jokerOwned = JOKERS.filter((joker) => state.owned.has(joker.id)).length;
     sections.push(`
-      <section class="suit-section">
+      <section class="suit-section pane-right" style="--pane-row: 3">
         <div class="suit-heading">
           <span class="suit-symbol">★</span><h2>王牌</h2>
           <span class="line"></span><small>${jokerOwned}/2</small>
@@ -129,7 +131,7 @@ function renderSuitSorted() {
 
 function renderRankSorted() {
   let visible = 0;
-  const sections = RANKS.map((rank) => {
+  const sections = RANKS.map((rank, rankIndex) => {
     const cards = SUITS.map((suit) => {
       const markup = cardButton({
         id: cardId(suit.id, rank), rank, symbol: suit.symbol, name: suit.name, red: suit.red,
@@ -139,8 +141,10 @@ function renderRankSorted() {
     }).join("");
     if (!cards) return "";
     const rankOwned = SUITS.filter((suit) => state.owned.has(cardId(suit.id, rank))).length;
+    const pane = rankIndex < 7 ? "left" : "right";
+    const paneRow = rankIndex < 7 ? rankIndex + 1 : rankIndex - 6;
     return `
-      <section class="rank-section">
+      <section class="rank-section pane-${pane}" style="--pane-row: ${paneRow}">
         <div class="rank-heading">
           <strong>${rank}</strong><span class="line"></span><small>${rankOwned}/4</small>
         </div>
@@ -156,7 +160,7 @@ function renderRankSorted() {
   if (jokerCards) {
     const jokerOwned = JOKERS.filter((joker) => state.owned.has(joker.id)).length;
     sections.push(`
-      <section class="rank-section">
+      <section class="rank-section pane-right" style="--pane-row: 7">
         <div class="rank-heading">
           <strong>JOKER</strong><span class="line"></span><small>${jokerOwned}/2</small>
         </div>

@@ -307,7 +307,7 @@ h1 em { color: var(--green); font-style: normal; }
 .data-menu button:hover { background: #222824; }
 .data-menu .danger { color: #f27b70; }
 
-.collection { padding-bottom: 70px; }
+.collection { position: relative; padding-bottom: 70px; }
 
 .suit-section { margin-top: 28px; }
 .suit-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
@@ -334,6 +334,35 @@ h1 em { color: var(--green); font-style: normal; }
 .rank-heading strong { color: var(--text); font-size: 15px; }
 .rank-heading .line { height: 1px; background: var(--line); flex: 1; }
 .rank-heading small { font-size: 10px; }
+
+@media (min-width: 1100px) {
+  .collection:not(:empty) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: repeat(7, auto);
+    column-gap: 48px;
+    align-items: start;
+  }
+  .collection:not(:empty)::before {
+    content: "";
+    position: absolute;
+    top: 18px;
+    bottom: 70px;
+    left: 50%;
+    width: 1px;
+    background: var(--line);
+  }
+  .collection .pane-left { grid-column: 1; }
+  .collection .pane-right { grid-column: 2; }
+  .collection .pane-left,
+  .collection .pane-right { grid-row: var(--pane-row); }
+  .collection .suit-section .card-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+  .collection .suit-section .card-grid.jokers {
+    grid-template-columns: repeat(2, minmax(100px, 120px));
+  }
+}
 
 .playing-card {
   aspect-ratio: .71;
